@@ -1,6 +1,6 @@
 // Offline support: network first, falling back to the cached copy.
-const CACHE = 'tg-v3';
-const CORE = ['./', 'index.html', 'config.js', 'manifest.webmanifest', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png'];
+const CACHE = 'tg-v4';
+const CORE = ['./', 'index.html', 'config.js', 'manifest.webmanifest', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'favicon-32.png', 'favicon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
