@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Thanksgiving run of show</title>
+<title>Thanksgiving 2026</title>
 <meta name="description" content="Thanksgiving kitchen schedule with live oven, slow cooker and stovetop status.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -31,6 +31,9 @@
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Inter,system-ui,-apple-system,sans-serif;overflow-x:clip;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
 .wrap{max-width:720px;margin:0 auto;padding:var(--sat) calc(14px + var(--sar)) calc(48px + var(--sab)) calc(14px + var(--sal))}
+.hd{display:flex;align-items:flex-start;gap:10px}
+.hd .ttl{flex:1}
+.hd button{margin-top:18px;flex:none}
 h1{font-size:26px;line-height:1.1;margin:18px 0 2px;font-weight:600;text-wrap:balance}
 .sub{color:var(--mute);font-size:14px;margin:0 0 12px}
 .top{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(10px + var(--sat)) 0 8px;margin-top:calc(-1 * var(--sat));border-bottom:1px solid var(--line)}
@@ -50,17 +53,26 @@ input[type=range]::-moz-range-track{height:8px;border-radius:4px;background:var(
 input[type=range]::-moz-range-progress{height:8px;border-radius:4px;background:var(--acc)}
 input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:#fff;border:3px solid var(--acc)}
 button{font:inherit;font-size:14px;min-height:40px;padding:0 14px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;touch-action:manipulation}
-button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+button.dng{color:#c0392b}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .flt{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center}
 .flt button.sel{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .flt .sp{flex:1}
+.ebar{display:none;gap:6px;margin-top:8px;flex-wrap:wrap}
+.editing .ebar{display:flex}
+.editing .flt,.editing .ctl,.editing #sl{display:none}
+.ebar .hint{flex-basis:100%;font-size:13px;color:var(--mute)}
 #list{margin-top:8px}
 .step{display:flex;flex-direction:column;gap:2px;padding:6px 8px;border-bottom:1px solid var(--line);border-radius:10px;scroll-margin-top:200px}
 .step.now{background:var(--nowbg);outline:1px solid var(--nowline)}
+.editing .step.now{background:none;outline:none}
 .step.big{border-left:4px solid var(--acc);border-radius:0 10px 10px 0}
 .step.hide,.it.hide{display:none}
 .it{display:flex;gap:10px;align-items:flex-start;cursor:pointer;padding:6px 0;min-height:44px;touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .it input{width:24px;height:24px;margin:1px 0 0;flex:none;accent-color:var(--acc)}
+.it .pen{display:none;width:24px;flex:none;text-align:center;color:var(--acc);font-size:17px}
+.editing .it input{display:none}.editing .it .pen{display:block}
 .it.done .tx{text-decoration:line-through;color:var(--mute)}
 .it.done .who{opacity:.5}
 .rng{width:96px;flex:none;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;font-size:15px}
@@ -68,23 +80,53 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-of
 .now .rng{color:var(--acc)}
 .dur{font-size:12px;font-weight:400;color:var(--mute)}
 .body{flex:1;display:flex;gap:6px;align-items:flex-start}
-.whos{flex:none;display:flex;gap:4px;padding-top:1px}
+.whos{flex:none;display:flex;gap:4px;padding-top:1px;flex-wrap:wrap;max-width:50%}
 .txt{flex:1}
 .tx{font-size:16px}
 .who{font-size:12px;font-weight:600;padding:2px 7px;border-radius:5px;color:#fff;white-space:nowrap}
-.HL{background:#0f6e56}.RH{background:#854f0b}.GU{background:#993556}
 .tag{font-size:11px;padding:1px 7px;border-radius:9px;margin-left:6px;white-space:nowrap;display:inline-block}
 .oven{background:var(--oven-bg);color:var(--oven-ink)}.slow{background:var(--slow-bg);color:var(--slow-ink)}.stove{background:var(--stove-bg);color:var(--stove-ink)}
 .note{font-size:13px;color:var(--mute);margin-top:1px}
 .foot{color:var(--mute);font-size:13px;margin-top:18px}
+.empty{color:var(--mute);padding:24px 0;text-align:center}
+/* Edit sheets */
+dialog{border:none;padding:0;margin:auto auto 0;width:100%;max-width:560px;max-height:92vh;max-height:92dvh;border-radius:16px 16px 0 0;background:var(--bg);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.sheet{padding:16px calc(16px + var(--sar)) calc(16px + var(--sab)) calc(16px + var(--sal));overflow-y:auto;max-height:inherit}
+.sheet h2{font-size:19px;margin:0 0 12px;font-weight:600}
+.fld{display:block;margin-bottom:12px}
+.fld>span{display:block;font-size:13px;color:var(--mute);margin-bottom:4px}
+.fld input:not([type=checkbox]):not([type=color]),.fld select,.fld textarea{width:100%;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);min-height:44px}
+.fld textarea{min-height:64px;resize:vertical}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tm{display:flex;gap:6px}.tm input{flex:1}.tm button{flex:none;padding:0 10px}
+.chk{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:15px}
+.chk input{width:22px;height:22px;accent-color:var(--acc)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{min-height:36px;opacity:.55}
+.chips button.on{opacity:1;color:#fff;border-color:transparent}
+.acts{display:flex;gap:8px;margin-top:16px}
+.acts .sp{flex:1}
+.ppl{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
+.pp{display:flex;gap:8px;align-items:center}
+.pp input[type=text]{flex:1;font:inherit;font-size:16px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);min-height:44px}
+.pp input[type=color]{width:44px;height:44px;border:none;padding:0;background:none;flex:none}
+.pp label{font-size:12px;color:var(--mute);display:flex;flex-direction:column;align-items:center;flex:none}
+.pp label input{width:20px;height:20px;accent-color:var(--acc)}
+.pp button{flex:none;width:44px;padding:0}
+.sect{border-top:1px solid var(--line);margin-top:16px;padding-top:14px}
+.sect p{font-size:13px;color:var(--mute);margin:0 0 10px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--mute);margin:-8px 0 10px}
+.live::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--mute)}
+.live.ok::before{background:#2e9e5b}
 @media(max-width:420px){.rng{width:86px;font-size:14px}.ap{padding:7px 8px}.ap .v{font-size:14px}}
 @media(prefers-reduced-motion:no-preference){.step{transition:background .3s}}
 </style>
 </head>
 <body>
-<div class="wrap">
-<h1>Thanksgiving run of show</h1>
-<p class="sub">Thursday · dinner at 5:45</p>
+<div class="wrap" id="app">
+<div class="hd"><div class="ttl"><h1 id="title"></h1><p class="sub" id="subt"></p><span class="live" id="live"></span></div><button id="editb">Edit</button></div>
 <div class="top">
   <div class="status">
     <div class="ap" id="a-oven"><div class="k">Oven</div><div class="v" id="v-oven"></div><div class="s" id="s-oven"></div></div>
@@ -93,66 +135,133 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-of
   </div>
   <div class="ctl"><button class="stp" id="prv" aria-label="Previous step">‹</button><span class="clk" id="clk"></span><button class="stp" id="nxt" aria-label="Next step">›</button><button id="nowb">Now</button></div>
   <input type="range" id="sl" min="480" max="1095" step="5" aria-label="Preview time">
-  <div class="flt"><button data-f="all">Everyone</button><button data-f="HL">HL</button><button data-f="RH">RH</button><span class="sp"></span><button id="reset">Clear checks</button></div>
+  <div class="flt" id="flt"></div>
+  <div class="ebar"><button class="pri" id="addb">+ Add step</button><button id="setb">Title &amp; people</button><div class="hint">Tap any step to change or delete it. Changes show up on everyone's phone right away.</div></div>
 </div>
 <div id="list"></div>
-<p class="foot">Checkmarks are saved on this phone only. Follows the real clock on Thanksgiving; drag the slider to preview any time. Tip: Share → Add to Home Screen to use it like an app, even offline.</p>
+<p class="foot">Edits and checkmarks sync to everyone who has this open. Follows the real clock; drag the slider to preview any time. Tip: Share → Add to Home Screen to use it like an app, even offline.</p>
 </div>
+
+<dialog id="ed"><form class="sheet" id="edf" method="dialog">
+  <h2 id="edh">Edit step</h2>
+  <label class="fld"><span>What</span><input id="f-x" required placeholder="e.g. Turkey in oven"></label>
+  <div class="row2">
+    <label class="fld"><span>Starts</span><input type="time" id="f-s" required step="300"></label>
+    <div class="fld"><span>Ends (optional)</span><div class="tm"><input type="time" id="f-e" step="300" aria-label="Ends"><button type="button" id="f-ec" aria-label="Clear end time">✕</button></div></div>
+  </div>
+  <div class="fld"><span>Who</span><div class="chips" id="f-w"></div></div>
+  <div class="row2">
+    <label class="fld"><span>Appliance</span><select id="f-a"><option value="">None</option><option value="oven">Oven</option><option value="slow">Slow cooker</option><option value="stove">Stovetop</option></select></label>
+    <label class="fld"><span>Length label</span><input id="f-d" placeholder="e.g. 4 hrs"></label>
+  </div>
+  <label class="fld" id="f-lw"><span>Status shown on the appliance card (needs an end time; blank hides it)</span><input id="f-l" placeholder="e.g. Turkey 325º"></label>
+  <label class="fld"><span>Note</span><textarea id="f-n" placeholder="Optional details"></textarea></label>
+  <label class="chk"><input type="checkbox" id="f-b"> Highlight this time slot</label>
+  <div class="acts"><button type="button" class="dng" id="f-del">Delete</button><span class="sp"></span><button type="button" id="f-cancel">Cancel</button><button class="pri" id="f-save" value="save">Save</button></div>
+</form></dialog>
+
+<dialog id="st"><div class="sheet">
+  <h2>Title &amp; people</h2>
+  <label class="fld"><span>Title</span><input id="g-t"></label>
+  <label class="fld"><span>Subtitle</span><input id="g-s"></label>
+  <div class="fld"><span>People (colour, and whether they get a filter button)</span><div class="ppl" id="g-p"></div><button type="button" id="g-add">+ Add person</button></div>
+  <div class="sect"><p>Reset puts back the original schedule for everyone.</p>
+    <div class="btns"><button type="button" class="dng" id="g-reset">Reset to original</button></div></div>
+  <div class="acts"><span class="sp"></span><button type="button" class="pri" id="g-done">Done</button></div>
+</div></dialog>
+
+<script src="config.js"></script>
 <script>
 {
-const steps=[
-["8:00",[["Wake up","","",["RH","HL"]]]],
-["8:30",[["Make breakfast","","",[],"9:00"]]],
-["9:00",[["Set the table","","",["Hannah"],"9:45"],["Move the couch","","",["RH","SW"]]]],
-["9:30",[["Prep stuffing","","",["HL"],"10:15"]]],
-["10:15",[["Stuffing cooking","oven","Check at 10:45",["HL"],"11:00","30–45 min"]]],
-["11:15",[["Turkey out to rest at room temp","","",["RH"],"12:30"],["Put wines in the fridge","","",["RH"]],["Prep charcuterie","","Into the fridge when done",["HL"],"12:30"],["Prep shrimp cocktail","","Into the fridge when done",["HL"],"12:30"]]],
-["12:30",[["Preheat oven to 325º","oven","",["RH"]],["Prep turkey","","Seasoned butter · salt & pepper · probe · cover with foil",["RH"],"12:45"]]],
-["1:00",[["Turkey in oven, cooking","oven","",["RH"],"5:00","4 hrs"]]],
-["1:15",[["Prep ham","","",["HL"],"1:30"]]],
-["1:30",[["Ham cooking","slow","",["HL"],"5:30","4 hrs"]]],
-["2:00",[["Lunch break / rest","","HL: good time to mix the ham glaze",[],"3:00"]]],
-["3:00",[["Prep potatoes","","",["HL","RH"],"3:30"]]],
-["3:30",[["Potatoes cooking","stove","",["HL"],"4:00","30 min"]]],
-["4:00",[["Take foil off turkey","oven","",["RH"]],["Mash potatoes","","",["HL"],"4:20"]]],
-["4:20",[["Get dressed for guests","","",[],"5:00"]]],
-["5:00",[["Take turkey out at 160º, then rest","oven","",["RH"],"5:30","30 min"],["Make gravy","stove","",["RH"]],["Stuffing final bake at 400º","oven","Then broil 5 min",["HL"],"5:20","20 min"],["Glaze ham","slow","",["HL"]],["Plate caviar","","",["HL"]]],1],
-["5:20",[["Broil stuffing","oven","",["HL"],"5:25","5 min"]]],
-["5:25",[["Stuffing out","oven","",["HL"]]]],
-["5:30",[["Carve turkey","","",["RH"]],["Make burrata salad","","",["HL"],"5:40","10 min"]]],
-["5:45",[["Serving dinner","","",[],"6:00"]]]
-];
-const bg={oven:[[615,660,"Stuffing","first bake"],[750,780,"Preheating","325º"],[780,1020,"Turkey","325º"],[1020,1040,"Stuffing","400º final bake"],[1040,1045,"Stuffing","broil"]],
-slow:[[810,1050,"Ham",""]],stove:[[930,960,"Potatoes",""],[1020,1040,"Gravy",""]]};
-const KEY='tg-2026-checks',FKEY='tg-2026-filter';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const load=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
 const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const uid=()=>Math.random().toString(36).slice(2,9);
+const I=(s,e,x,o={})=>({id:uid(),s,e,x,a:o.a||'',l:o.l||'',n:o.n||'',w:o.w||[],d:o.d||'',b:!!o.b});
+const DEF=()=>({title:"Thanksgiving 2026",sub:"Thursday · dinner at 5:45",date:"2026-11-26",
+people:[{n:"HL",c:"#0f6e56",f:1},{n:"RH",c:"#854f0b",f:1},{n:"Hannah",c:"#993556",f:0},{n:"SW",c:"#993556",f:0}],
+items:[
+I("08:00","","Wake up",{w:["RH","HL"]}),
+I("08:30","09:00","Make breakfast"),
+I("09:00","09:45","Set the table",{w:["Hannah"]}),
+I("09:00","","Move the couch",{w:["RH","SW"]}),
+I("09:30","10:15","Prep stuffing",{w:["HL"]}),
+I("10:15","11:00","Stuffing cooking",{a:"oven",l:"Stuffing",n:"Check at 10:45",w:["HL"],d:"30–45 min"}),
+I("11:15","12:30","Turkey out to rest at room temp",{w:["RH"]}),
+I("11:15","","Put wines in the fridge",{w:["RH"]}),
+I("11:15","12:30","Prep charcuterie",{n:"Into the fridge when done",w:["HL"]}),
+I("11:15","12:30","Prep shrimp cocktail",{n:"Into the fridge when done",w:["HL"]}),
+I("12:30","13:00","Preheat oven to 325º",{a:"oven",l:"Preheating 325º",w:["RH"]}),
+I("12:30","12:45","Prep turkey",{n:"Seasoned butter · salt & pepper · probe · cover with foil",w:["RH"]}),
+I("13:00","17:00","Turkey in oven, cooking",{a:"oven",l:"Turkey 325º",w:["RH"],d:"4 hrs"}),
+I("13:15","13:30","Prep ham",{w:["HL"]}),
+I("13:30","17:30","Ham cooking",{a:"slow",l:"Ham",w:["HL"],d:"4 hrs"}),
+I("14:00","15:00","Lunch break / rest",{n:"HL: good time to mix the ham glaze"}),
+I("15:00","15:30","Prep potatoes",{w:["HL","RH"]}),
+I("15:30","16:00","Potatoes cooking",{a:"stove",l:"Potatoes",w:["HL"],d:"30 min"}),
+I("16:00","","Take foil off turkey",{a:"oven",w:["RH"]}),
+I("16:00","16:20","Mash potatoes",{w:["HL"]}),
+I("16:20","17:00","Get dressed for guests"),
+I("17:00","17:30","Take turkey out at 160º, then rest",{a:"oven",w:["RH"],d:"30 min",b:1}),
+I("17:00","17:20","Make gravy",{a:"stove",l:"Gravy",w:["RH"],b:1}),
+I("17:00","17:20","Stuffing final bake at 400º",{a:"oven",l:"Stuffing 400º",n:"Then broil 5 min",w:["HL"],d:"20 min",b:1}),
+I("17:00","","Glaze ham",{a:"slow",w:["HL"],b:1}),
+I("17:00","","Plate caviar",{w:["HL"],b:1}),
+I("17:20","17:25","Broil stuffing",{a:"oven",l:"Stuffing broil",w:["HL"],d:"5 min"}),
+I("17:25","","Stuffing out",{a:"oven",w:["HL"]}),
+I("17:30","","Carve turkey",{w:["RH"]}),
+I("17:30","17:40","Make burrata salad",{w:["HL"],d:"10 min"}),
+I("17:45","18:00","Serving dinner")]});
+const DKEY='tg-data-v2',KEY='tg-checks-v2',FKEY='tg-2026-filter';
+let D=load(DKEY)||DEF();
 let checks=load(KEY)||{};
-const cls=p=>p=='HL'?'HL':p=='RH'?'RH':'GU';
-const t=s=>{let[h,m]=s.split(':').map(Number);if(h<7)h+=12;return h*60+m};
-const f=m=>{let h=Math.floor(m/60),mm=String(m%60).padStart(2,'0');return (h>12?h-12:h)+':'+mm+(h>=12?' pm':' am')};
-document.getElementById('list').innerHTML=steps.map(([tm,its,big],i)=>`<div class="step${big?' big':''}" id="st${i}">`+its.map(([x,tg,n,w,e,d],j)=>{w=w||[];const id=i+'-'+j;return `<label class="it${checks[id]?' done':''}" data-w="${w.join(' ')}"><input type="checkbox" data-id="${id}"${checks[id]?' checked':''}><div class="rng">${tm}${e?`<span> – </span>${e}`:''}${d?`<div class="dur">${d}</div>`:''}</div><div class="body">${w.length?`<div class="whos">${w.map(p=>`<span class="who ${cls(p)}">${p}</span>`).join('')}</div>`:''}<div class="txt"><span class="tx">${x}</span>${tg?`<span class="tag ${tg}">${tg=='slow'?'slow cooker':tg}</span>`:''}${n?`<div class="note">${n}</div>`:''}</div></div></label>`}).join('')+'</div>').join('');
-document.querySelectorAll('.it input').forEach(c=>c.addEventListener('change',()=>{c.closest('.it').classList.toggle('done',c.checked);if(c.checked)checks[c.dataset.id]=1;else delete checks[c.dataset.id];save(KEY,checks);if(c.checked&&navigator.vibrate)navigator.vibrate(10)}));
-document.getElementById('reset').addEventListener('click',()=>{if(!confirm('Clear all checkmarks?'))return;checks={};save(KEY,checks);document.querySelectorAll('.it input').forEach(c=>{c.checked=false;c.closest('.it').classList.remove('done')})});
-function applyFilter(fv){document.querySelectorAll('.flt button[data-f]').forEach(x=>x.classList.toggle('sel',x.dataset.f==fv));
-steps.forEach((_,i)=>{const st=document.getElementById('st'+i);let vis=0;st.querySelectorAll('.it').forEach(it=>{const w=it.dataset.w;const show=fv=='all'||w==''||w.split(' ').includes(fv);it.classList.toggle('hide',!show);if(show)vis++});st.classList.toggle('hide',!vis)});save(FKEY,fv)}
-document.querySelectorAll('.flt button[data-f]').forEach(b=>b.addEventListener('click',()=>applyFilter(b.dataset.f)));
-applyFilter(load(FKEY)||'all');
-const sl=document.getElementById('sl');
-const clamp=m=>Math.min(1095,Math.max(480,m));
+let pushData=()=>{},pushCheck=()=>{},pushChecksClear=()=>{};
+const persist=()=>{save(DKEY,D);pushData()};
+const APPL={oven:'oven',slow:'slow cooker',stove:'stovetop'};
+const mm=s=>{if(!s)return null;const[h,m]=s.split(':').map(Number);return h*60+m};
+const f12=m=>{let h=Math.floor(m/60),x=String(m%60).padStart(2,'0');return ((h+11)%12+1)+':'+x+(h>=12?' pm':' am')};
+const fS=m=>{let h=Math.floor(m/60),x=String(m%60).padStart(2,'0');return ((h+11)%12+1)+':'+x};
+const pcol=n=>(D.people.find(p=>p.n==n)||{}).c||'#993556';
+let groups=[],lo=480,hi=1095,filterV=load(FKEY)||'all',editing=false;
+
+
+function render(){
+  $('title').textContent=D.title;$('subt').textContent=D.sub;document.title=D.title||'Run of show';
+  D.items.sort((a,b)=>mm(a.s)-mm(b.s));
+  groups=[];D.items.forEach(it=>{const m=mm(it.s);let g=groups[groups.length-1];if(!g||g.m!=m){g={m,items:[]};groups.push(g)}g.items.push(it)});
+  const ends=D.items.map(i=>mm(i.e)??mm(i.s));
+  lo=groups.length?Math.floor(groups[0].m/5)*5:480;hi=Math.max(lo+60,...ends.map(e=>e+15));
+  sl.min=lo;sl.max=hi;
+  $('list').innerHTML=groups.length?groups.map((g,i)=>`<div class="step${g.items.some(x=>x.b)?' big':''}" id="st${i}">`+g.items.map(it=>{const w=it.w||[];return `<label class="it${checks[it.id]?' done':''}" data-w="${esc(w.join('\u0001'))}" data-id="${it.id}"><input type="checkbox" data-id="${it.id}"${checks[it.id]?' checked':''}><span class="pen" aria-hidden="true">✎</span><div class="rng">${fS(g.m)}${it.e?`<span> – </span>${fS(mm(it.e))}`:''}${it.d?`<div class="dur">${esc(it.d)}</div>`:''}</div><div class="body">${w.length?`<div class="whos">${w.map(p=>`<span class="who" style="background:${esc(pcol(p))}">${esc(p)}</span>`).join('')}</div>`:''}<div class="txt"><span class="tx">${esc(it.x)}</span>${it.a?`<span class="tag ${it.a}">${APPL[it.a]}</span>`:''}${it.n?`<div class="note">${esc(it.n)}</div>`:''}</div></div></label>`}).join('')+'</div>').join(''):'<div class="empty">No steps yet. Tap Edit, then + Add step.</div>';
+  document.querySelectorAll('.it input').forEach(c=>c.addEventListener('change',()=>{c.closest('.it').classList.toggle('done',c.checked);if(c.checked)checks[c.dataset.id]=true;else delete checks[c.dataset.id];save(KEY,checks);pushCheck(c.dataset.id,c.checked);if(c.checked&&navigator.vibrate)navigator.vibrate(10)}));
+  document.querySelectorAll('.it').forEach(l=>l.addEventListener('click',e=>{if(!editing)return;e.preventDefault();openItem(D.items.find(i=>i.id==l.dataset.id))}));
+  const fl=D.people.filter(p=>p.f);if(filterV!='all'&&!fl.some(p=>p.n==filterV))filterV='all';
+  $('flt').innerHTML=`<button data-f="all">Everyone</button>`+fl.map(p=>`<button data-f="${esc(p.n)}">${esc(p.n)}</button>`).join('')+`<span class="sp"></span><button id="reset">Clear checks</button>`;
+  document.querySelectorAll('#flt button[data-f]').forEach(b=>b.addEventListener('click',()=>applyFilter(b.dataset.f)));
+  $('reset').addEventListener('click',()=>{if(!confirm('Clear all checkmarks?'))return;checks={};save(KEY,checks);pushChecksClear();document.querySelectorAll('.it input').forEach(c=>{c.checked=false;c.closest('.it').classList.remove('done')})});
+  applyFilter(filterV);
+  if(following)goNow(false);else upd(clamp(+sl.value));
+}
+function applyFilter(fv){filterV=fv;document.querySelectorAll('#flt button[data-f]').forEach(x=>x.classList.toggle('sel',x.dataset.f==fv));
+  groups.forEach((_,i)=>{const st=$('st'+i);let vis=0;st.querySelectorAll('.it').forEach(it=>{const w=it.dataset.w;const show=editing||fv=='all'||w==''||w.split('\u0001').includes(fv);it.classList.toggle('hide',!show);if(show)vis++});st.classList.toggle('hide',!vis)});save(FKEY,fv)}
+
+const sl=$('sl');
+const clamp=m=>Math.min(hi,Math.max(lo,m));
 let following=false;
-function upd(m,scroll){document.getElementById('clk').textContent=f(m);sl.style.setProperty('--p',((m-480)/(1095-480)*100)+'%');
-let cur=-1;steps.forEach(([tm],i)=>{if(t(tm)<=m)cur=i});
-steps.forEach((_,i)=>document.getElementById('st'+i).classList.toggle('now',i==cur));
-for(const k in bg){const a=bg[k].find(([s,e])=>m>=s&&m<e);document.getElementById('v-'+k).textContent=a?a[2]:'Free';document.getElementById('s-'+k).textContent=a?(a[3]?a[3]+' · ':'')+'done '+f(a[1]):'';document.getElementById('a-'+k).classList.toggle('on',!!a)}
-if(scroll&&cur>=0){const el=document.getElementById('st'+cur);const y=el.getBoundingClientRect().top+scrollY-document.querySelector('.top').offsetHeight-12;scrollTo({top:Math.max(0,y),behavior:'smooth'})}}
+function upd(m,scroll){$('clk').textContent=f12(m);sl.style.setProperty('--p',((m-lo)/(hi-lo)*100)+'%');
+  let cur=-1;groups.forEach((g,i)=>{if(g.m<=m)cur=i});
+  groups.forEach((_,i)=>$('st'+i).classList.toggle('now',i==cur));
+  for(const k in APPL){const a=D.items.filter(i=>i.a==k&&i.l&&i.e&&m>=mm(i.s)&&m<mm(i.e)).pop();$('v-'+k).textContent=a?a.l:'Free';$('s-'+k).textContent=a?'until '+f12(mm(a.e)):'';$('a-'+k).classList.toggle('on',!!a)}
+  if(scroll&&cur>=0){const el=$('st'+cur);if(el.classList.contains('hide'))return;const y=el.getBoundingClientRect().top+scrollY-document.querySelector('.top').offsetHeight-12;scrollTo({top:Math.max(0,y),behavior:'smooth'})}}
 const nowM=()=>{const d=new Date();return d.getHours()*60+d.getMinutes()};
-const isDay=()=>{const d=new Date();return d.getFullYear()==2026&&d.getMonth()==10&&d.getDate()==26};
-function goNow(scroll){following=true;const m=isDay()?clamp(nowM()):480;sl.value=m;upd(m,scroll)}
+const isDay=()=>{const d=new Date();const p=n=>String(n).padStart(2,'0');return D.date==d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())};
+function goNow(scroll){following=true;const m=clamp(nowM());sl.value=m;upd(m,scroll)}
 sl.addEventListener('input',()=>{following=false;upd(+sl.value)});
-// Touch: tap anywhere on the track to jump, drag anywhere to scrub (not just on the thumb). Scrolls to that step on release.
+$('nowb').addEventListener('click',()=>goNow(true));
+// Touch: tap anywhere on the track to jump, drag anywhere to scrub. Scrolls to that step on release.
 let drag=null;
-const fromX=x=>{const r=sl.getBoundingClientRect(),pad=15,p=Math.min(1,Math.max(0,(x-r.left-pad)/(r.width-2*pad)));return clamp(Math.round((480+p*615)/5)*5)};
+const fromX=x=>{const r=sl.getBoundingClientRect(),pad=15,p=Math.min(1,Math.max(0,(x-r.left-pad)/(r.width-2*pad)));return clamp(Math.round((lo+p*(hi-lo))/5)*5)};
 const setM=(m,scroll)=>{following=false;sl.value=m;upd(m,scroll)};
 sl.addEventListener('pointerdown',e=>{e.preventDefault();drag=e.pointerId;try{sl.setPointerCapture(e.pointerId)}catch(_){}setM(fromX(e.clientX))});
 sl.addEventListener('pointermove',e=>{if(drag===e.pointerId){e.preventDefault();setM(fromX(e.clientX))}});
@@ -161,15 +270,75 @@ sl.addEventListener('pointerup',endDrag);sl.addEventListener('pointercancel',end
 sl.addEventListener('touchstart',e=>e.preventDefault(),{passive:false});
 sl.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 sl.addEventListener('change',()=>{if(drag===null)upd(+sl.value,true)});
-// Step buttons jump between scheduled times.
-const times=[...new Set(steps.map(([tm])=>t(tm)))].sort((a,b)=>a-b);
-document.getElementById('prv').addEventListener('click',()=>{const m=+sl.value;const p=times.filter(x=>x<m).pop();setM(p??480,true)});
-document.getElementById('nxt').addEventListener('click',()=>{const m=+sl.value;const n=times.find(x=>x>m);if(n!=null)setM(n,true)});
-document.getElementById('nowb').addEventListener('click',()=>goNow(true));
-goNow(isDay());
-setInterval(()=>{if(following&&isDay()){const m=clamp(nowM());sl.value=m;upd(m)}},30000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&following&&isDay())goNow(false)});
-// Keep the screen awake while the app is open (iOS 16.4+), so it stays readable on the counter.
+$('prv').addEventListener('click',()=>{const m=+sl.value;const p=groups.map(g=>g.m).filter(x=>x<m).pop();setM(p??lo,true)});
+$('nxt').addEventListener('click',()=>{const m=+sl.value;const n=groups.map(g=>g.m).find(x=>x>m);if(n!=null)setM(n,true)});
+
+// ---- Editing ----
+$('editb').addEventListener('click',()=>{editing=!editing;$('app').classList.toggle('editing',editing);$('editb').textContent=editing?'Done':'Edit';$('editb').classList.toggle('pri',editing);applyFilter(filterV);if(!editing)goNow(false)});
+let cur=null,selW=[];
+function chips(){$('f-w').innerHTML=D.people.map(p=>`<button type="button" class="${selW.includes(p.n)?'on':''}" style="${selW.includes(p.n)?'background:'+esc(p.c):''}" data-n="${esc(p.n)}">${esc(p.n)}</button>`).join('')+`<button type="button" id="f-wadd" class="on" style="background:var(--card);color:var(--ink);border-color:var(--line)">+ New</button>`;
+  $('f-w').querySelectorAll('[data-n]').forEach(b=>b.addEventListener('click',()=>{const n=b.dataset.n;selW=selW.includes(n)?selW.filter(x=>x!=n):[...selW,n];chips()}));
+  $('f-wadd').addEventListener('click',()=>{const n=(prompt('Name or initials')||'').trim();if(!n)return;if(!D.people.some(p=>p.n==n))D.people.push({n,c:'#5b6b8c',f:0});if(!selW.includes(n))selW.push(n);chips()})}
+const syncL=()=>{$('f-lw').style.display=$('f-a').value?'':'none'};
+$('f-a').addEventListener('change',syncL);
+$('f-ec').addEventListener('click',()=>{$('f-e').value=''});
+function openItem(it){cur=it||null;const v=it||{s:fmtIn(clamp(+sl.value)),e:'',x:'',a:'',l:'',n:'',w:[],d:'',b:false};
+  $('edh').textContent=it?'Edit step':'New step';$('f-del').style.display=it?'':'none';
+  $('f-x').value=v.x;$('f-s').value=v.s;$('f-e').value=v.e;$('f-a').value=v.a;$('f-l').value=v.l;$('f-n').value=v.n;$('f-d').value=v.d;$('f-b').checked=!!v.b;
+  selW=[...(v.w||[])];chips();syncL();$('ed').showModal()}
+const fmtIn=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+$('f-cancel').addEventListener('click',()=>$('ed').close());
+$('edf').addEventListener('submit',e=>{e.preventDefault();
+  const s=$('f-s').value,en=$('f-e').value;if(!s||!$('f-x').value.trim())return;
+  if(en&&mm(en)<=mm(s)){alert('The end time needs to be after the start time.');return}
+  const v={s,e:en,x:$('f-x').value.trim(),a:$('f-a').value,l:$('f-a').value?$('f-l').value.trim():'',n:$('f-n').value.trim(),w:selW.filter(n=>D.people.some(p=>p.n==n)),d:$('f-d').value.trim(),b:$('f-b').checked};
+  const tgt=cur&&D.items.find(i=>i.id==cur.id);if(tgt)Object.assign(tgt,v);else D.items.push({id:cur?cur.id:uid(),...v});
+  persist();$('ed').close();render()});
+$('f-del').addEventListener('click',()=>{if(!cur||!confirm('Delete "'+cur.x+'"?'))return;D.items=D.items.filter(i=>i.id!==cur.id);delete checks[cur.id];save(KEY,checks);pushCheck(cur.id,false);persist();$('ed').close();render()});
+$('addb').addEventListener('click',()=>openItem(null));
+
+function people(){$('g-p').innerHTML=D.people.map((p,i)=>`<div class="pp"><input type="color" value="${esc(p.c)}" data-i="${i}" aria-label="Colour for ${esc(p.n)}"><input type="text" value="${esc(p.n)}" data-i="${i}" aria-label="Name"><label><input type="checkbox" data-i="${i}"${p.f?' checked':''}>filter</label><button type="button" data-i="${i}" aria-label="Remove ${esc(p.n)}">✕</button></div>`).join('');
+  $('g-p').querySelectorAll('input[type=color]').forEach(c=>c.addEventListener('input',()=>{D.people[c.dataset.i].c=c.value;persist()}));
+  $('g-p').querySelectorAll('input[type=checkbox]').forEach(c=>c.addEventListener('change',()=>{D.people[c.dataset.i].f=c.checked?1:0;persist()}));
+  $('g-p').querySelectorAll('input[type=text]').forEach(c=>c.addEventListener('change',()=>{const p=D.people[c.dataset.i],old=p.n,n=c.value.trim();if(!n||D.people.some(q=>q!==p&&q.n==n)){c.value=old;return}p.n=n;D.items.forEach(it=>{it.w=(it.w||[]).map(w=>w==old?n:w)});if(filterV==old)filterV=n;persist()}));
+  $('g-p').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const p=D.people[b.dataset.i];if(!confirm('Remove '+p.n+'? They will be taken off every step.'))return;D.people.splice(b.dataset.i,1);D.items.forEach(it=>{it.w=(it.w||[]).filter(w=>w!=p.n)});persist();people()}))}
+$('setb').addEventListener('click',()=>{$('g-t').value=D.title;$('g-s').value=D.sub;people();$('st').showModal()});
+$('g-t').addEventListener('input',()=>{D.title=$('g-t').value;persist()});
+$('g-s').addEventListener('input',()=>{D.sub=$('g-s').value;persist()});
+$('g-add').addEventListener('click',()=>{D.people.push({n:'New '+(D.people.length+1),c:'#5b6b8c',f:0});persist();people();const t=$('g-p').querySelectorAll('input[type=text]');t[t.length-1].select()});
+$('g-done').addEventListener('click',()=>{$('st').close()});
+$('st').addEventListener('close',render);
+$('g-reset').addEventListener('click',()=>{if(!confirm('Reset to the original schedule? This changes it on every phone.'))return;D=DEF();persist();$('st').close()});
+render();goNow(true);
+setInterval(()=>{if(following&&!editing){const m=clamp(nowM());if(m!=+sl.value){sl.value=m;upd(m)}}},30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&following)goNow(false)});
+
+// ---- Live sync (Firebase Realtime Database), configured in config.js ----
+const live=$('live');
+const setLive=(t,ok)=>{live.textContent=t;live.className='live'+(ok?' ok':'')};
+if(window.FB_CONFIG&&window.FB_CONFIG.databaseURL){
+  setLive('Connecting…');
+  const V='10.12.2',B='https://www.gstatic.com/firebasejs/'+V+'/';
+  Promise.all([import(B+'firebase-app.js'),import(B+'firebase-database.js')]).then(([A,R])=>{
+    const db=R.getDatabase(A.initializeApp(window.FB_CONFIG));
+    const root=window.FB_ROOT||'thanksgiving';
+    const dRef=R.ref(db,root+'/data'),cRef=R.ref(db,root+'/checks');
+    let gotFirst=false;
+    pushData=()=>R.set(dRef,JSON.parse(JSON.stringify(D))).catch(e=>setLive('Not saved',false));
+    pushCheck=(id,on)=>R.set(R.ref(db,root+'/checks/'+id),on?true:null).catch(()=>{});
+    pushChecksClear=()=>R.set(cRef,null).catch(()=>{});
+    R.onValue(dRef,s=>{const v=s.val();
+      if(!v){if(!gotFirst){gotFirst=true;pushData()}return}
+      gotFirst=true;
+      v.items=(v.items?Object.values(v.items):[]).map(i=>({id:i.id||uid(),s:i.s,e:i.e||'',x:i.x||'',a:i.a||'',l:i.l||'',n:i.n||'',w:i.w?Object.values(i.w):[],d:i.d||'',b:!!i.b}));
+      v.people=v.people?Object.values(v.people):[];
+      D=v;save(DKEY,D);
+      if(!$('st').open)render()});
+    R.onValue(cRef,s=>{checks=s.val()||{};save(KEY,checks);
+      document.querySelectorAll('.it input').forEach(c=>{const on=!!checks[c.dataset.id];c.checked=on;c.closest('.it').classList.toggle('done',on)})});
+    R.onValue(R.ref(db,'.info/connected'),s=>setLive(s.val()?'Live':'Offline · will sync',!!s.val()));
+  }).catch(()=>setLive('Offline · this phone only',false));
+}else setLive('This phone only',false);
 let lock=null;const wake=async()=>{try{if('wakeLock' in navigator&&!document.hidden)lock=await navigator.wakeLock.request('screen')}catch(e){}};
 wake();document.addEventListener('visibilitychange',wake);
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
