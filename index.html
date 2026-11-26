@@ -40,9 +40,15 @@ h1{font-size:26px;line-height:1.1;margin:18px 0 2px;font-weight:600;text-wrap:ba
 .ap .k{font-size:12px;color:var(--mute)}
 .ap .v{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ap .s{font-size:12px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ctl{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:14px}
-.clk{min-width:72px;font-weight:600;font-variant-numeric:tabular-nums}
-input[type=range]{flex:1;accent-color:var(--acc);height:36px}
+.ctl{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:14px}
+.clk{flex:1;text-align:center;font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
+.ctl .stp{width:48px;padding:0;font-size:20px;line-height:1}
+input[type=range]{display:block;width:100%;margin:4px 0 0;height:44px;background:transparent;-webkit-appearance:none;appearance:none;touch-action:none;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:4px;background:linear-gradient(to right,var(--acc) var(--p,0%),var(--line) var(--p,0%))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:30px;height:30px;margin-top:-11px;border-radius:50%;background:#fff;border:3px solid var(--acc);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+input[type=range]::-moz-range-track{height:8px;border-radius:4px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:8px;border-radius:4px;background:var(--acc)}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:#fff;border:3px solid var(--acc)}
 button{font:inherit;font-size:14px;min-height:40px;padding:0 14px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;touch-action:manipulation}
 button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .flt{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center}
@@ -85,7 +91,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-of
     <div class="ap" id="a-slow"><div class="k">Slow cooker</div><div class="v" id="v-slow"></div><div class="s" id="s-slow"></div></div>
     <div class="ap" id="a-stove"><div class="k">Stovetop</div><div class="v" id="v-stove"></div><div class="s" id="s-stove"></div></div>
   </div>
-  <div class="ctl"><span class="clk" id="clk"></span><input type="range" id="sl" min="480" max="1095" step="5" aria-label="Preview time"><button id="nowb">Now</button></div>
+  <div class="ctl"><button class="stp" id="prv" aria-label="Previous step">‹</button><span class="clk" id="clk"></span><button class="stp" id="nxt" aria-label="Next step">›</button><button id="nowb">Now</button></div>
+  <input type="range" id="sl" min="480" max="1095" step="5" aria-label="Preview time">
   <div class="flt"><button data-f="all">Everyone</button><button data-f="HL">HL</button><button data-f="RH">RH</button><span class="sp"></span><button id="reset">Clear checks</button></div>
 </div>
 <div id="list"></div>
@@ -134,7 +141,7 @@ applyFilter(load(FKEY)||'all');
 const sl=document.getElementById('sl');
 const clamp=m=>Math.min(1095,Math.max(480,m));
 let following=false;
-function upd(m,scroll){document.getElementById('clk').textContent=f(m);
+function upd(m,scroll){document.getElementById('clk').textContent=f(m);sl.style.setProperty('--p',((m-480)/(1095-480)*100)+'%');
 let cur=-1;steps.forEach(([tm],i)=>{if(t(tm)<=m)cur=i});
 steps.forEach((_,i)=>document.getElementById('st'+i).classList.toggle('now',i==cur));
 for(const k in bg){const a=bg[k].find(([s,e])=>m>=s&&m<e);document.getElementById('v-'+k).textContent=a?a[2]:'Free';document.getElementById('s-'+k).textContent=a?(a[3]?a[3]+' · ':'')+'done '+f(a[1]):'';document.getElementById('a-'+k).classList.toggle('on',!!a)}
@@ -143,6 +150,21 @@ const nowM=()=>{const d=new Date();return d.getHours()*60+d.getMinutes()};
 const isDay=()=>{const d=new Date();return d.getFullYear()==2026&&d.getMonth()==10&&d.getDate()==26};
 function goNow(scroll){following=true;const m=isDay()?clamp(nowM()):480;sl.value=m;upd(m,scroll)}
 sl.addEventListener('input',()=>{following=false;upd(+sl.value)});
+// Touch: tap anywhere on the track to jump, drag anywhere to scrub (not just on the thumb). Scrolls to that step on release.
+let drag=null;
+const fromX=x=>{const r=sl.getBoundingClientRect(),pad=15,p=Math.min(1,Math.max(0,(x-r.left-pad)/(r.width-2*pad)));return clamp(Math.round((480+p*615)/5)*5)};
+const setM=(m,scroll)=>{following=false;sl.value=m;upd(m,scroll)};
+sl.addEventListener('pointerdown',e=>{e.preventDefault();drag=e.pointerId;try{sl.setPointerCapture(e.pointerId)}catch(_){}setM(fromX(e.clientX))});
+sl.addEventListener('pointermove',e=>{if(drag===e.pointerId){e.preventDefault();setM(fromX(e.clientX))}});
+const endDrag=e=>{if(drag===e.pointerId){drag=null;upd(+sl.value,true)}};
+sl.addEventListener('pointerup',endDrag);sl.addEventListener('pointercancel',endDrag);
+sl.addEventListener('touchstart',e=>e.preventDefault(),{passive:false});
+sl.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+sl.addEventListener('change',()=>{if(drag===null)upd(+sl.value,true)});
+// Step buttons jump between scheduled times.
+const times=[...new Set(steps.map(([tm])=>t(tm)))].sort((a,b)=>a-b);
+document.getElementById('prv').addEventListener('click',()=>{const m=+sl.value;const p=times.filter(x=>x<m).pop();setM(p??480,true)});
+document.getElementById('nxt').addEventListener('click',()=>{const m=+sl.value;const n=times.find(x=>x>m);if(n!=null)setM(n,true)});
 document.getElementById('nowb').addEventListener('click',()=>goNow(true));
 goNow(isDay());
 setInterval(()=>{if(following&&isDay()){const m=clamp(nowM());sl.value=m;upd(m)}},30000);
