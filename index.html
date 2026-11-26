@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Thanksgiving run of show</title>
+<meta name="description" content="Thanksgiving kitchen schedule with live oven, slow cooker and stovetop status.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Thanksgiving">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#fbf8f3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16130f" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;
+--bg:light-dark(#fbf8f3,#16130f);--card:light-dark(#ffffff,#211c17);--ink:light-dark(#1f1a14,#f3ede4);
+--mute:light-dark(#6f665b,#a79d90);--line:light-dark(#e7e0d5,#342d25);--acc:#d4602c;
+--nowbg:light-dark(#fdf0e3,#3a2614);--nowline:light-dark(#efc79f,#7a4a22);
+--oven-bg:light-dark(#faece7,#4a1b0c);--oven-ink:light-dark(#712b13,#f5c4b3);
+--slow-bg:light-dark(#eeedfe,#26215c);--slow-ink:light-dark(#3c3489,#cecbf6);
+--stove-bg:light-dark(#f1efe8,#2c2c2a);--stove-ink:light-dark(#444441,#d3d1c7);
+--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);
+--sal:env(safe-area-inset-left,0px);--sar:env(safe-area-inset-right,0px)}
+*{box-sizing:border-box;min-width:0}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Inter,system-ui,-apple-system,sans-serif;overflow-x:clip;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+.wrap{max-width:720px;margin:0 auto;padding:var(--sat) calc(14px + var(--sar)) calc(48px + var(--sab)) calc(14px + var(--sal))}
+h1{font-size:26px;line-height:1.1;margin:18px 0 2px;font-weight:600;text-wrap:balance}
+.sub{color:var(--mute);font-size:14px;margin:0 0 12px}
+.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(10px + var(--sat)) 0 8px;margin-top:calc(-1 * var(--sat));border-bottom:1px solid var(--line)}
+.status{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.ap{border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--card)}
+.ap.on{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc)}
+.ap .k{font-size:12px;color:var(--mute)}
+.ap .v{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ap .s{font-size:12px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctl{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:14px}
+.clk{min-width:72px;font-weight:600;font-variant-numeric:tabular-nums}
+input[type=range]{flex:1;accent-color:var(--acc);height:36px}
+button{font:inherit;font-size:14px;min-height:40px;padding:0 14px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;touch-action:manipulation}
+button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.flt{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center}
+.flt button.sel{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.flt .sp{flex:1}
+#list{margin-top:8px}
+.step{display:flex;flex-direction:column;gap:2px;padding:6px 8px;border-bottom:1px solid var(--line);border-radius:10px;scroll-margin-top:200px}
+.step.now{background:var(--nowbg);outline:1px solid var(--nowline)}
+.step.big{border-left:4px solid var(--acc);border-radius:0 10px 10px 0}
+.step.hide,.it.hide{display:none}
+.it{display:flex;gap:10px;align-items:flex-start;cursor:pointer;padding:6px 0;min-height:44px;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.it input{width:24px;height:24px;margin:1px 0 0;flex:none;accent-color:var(--acc)}
+.it.done .tx{text-decoration:line-through;color:var(--mute)}
+.it.done .who{opacity:.5}
+.rng{width:96px;flex:none;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;font-size:15px}
+.rng span{color:var(--mute);font-weight:400}
+.now .rng{color:var(--acc)}
+.dur{font-size:12px;font-weight:400;color:var(--mute)}
+.body{flex:1;display:flex;gap:6px;align-items:flex-start}
+.whos{flex:none;display:flex;gap:4px;padding-top:1px}
+.txt{flex:1}
+.tx{font-size:16px}
+.who{font-size:12px;font-weight:600;padding:2px 7px;border-radius:5px;color:#fff;white-space:nowrap}
+.HL{background:#0f6e56}.RH{background:#854f0b}.GU{background:#993556}
+.tag{font-size:11px;padding:1px 7px;border-radius:9px;margin-left:6px;white-space:nowrap;display:inline-block}
+.oven{background:var(--oven-bg);color:var(--oven-ink)}.slow{background:var(--slow-bg);color:var(--slow-ink)}.stove{background:var(--stove-bg);color:var(--stove-ink)}
+.note{font-size:13px;color:var(--mute);margin-top:1px}
+.foot{color:var(--mute);font-size:13px;margin-top:18px}
+@media(max-width:420px){.rng{width:86px;font-size:14px}.ap{padding:7px 8px}.ap .v{font-size:14px}}
+@media(prefers-reduced-motion:no-preference){.step{transition:background .3s}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Thanksgiving run of show</h1>
+<p class="sub">Thursday · dinner at 5:45</p>
+<div class="top">
+  <div class="status">
+    <div class="ap" id="a-oven"><div class="k">Oven</div><div class="v" id="v-oven"></div><div class="s" id="s-oven"></div></div>
+    <div class="ap" id="a-slow"><div class="k">Slow cooker</div><div class="v" id="v-slow"></div><div class="s" id="s-slow"></div></div>
+    <div class="ap" id="a-stove"><div class="k">Stovetop</div><div class="v" id="v-stove"></div><div class="s" id="s-stove"></div></div>
+  </div>
+  <div class="ctl"><span class="clk" id="clk"></span><input type="range" id="sl" min="480" max="1095" step="5" aria-label="Preview time"><button id="nowb">Now</button></div>
+  <div class="flt"><button data-f="all">Everyone</button><button data-f="HL">HL</button><button data-f="RH">RH</button><span class="sp"></span><button id="reset">Clear checks</button></div>
+</div>
+<div id="list"></div>
+<p class="foot">Checkmarks are saved on this phone only. Follows the real clock on Thanksgiving; drag the slider to preview any time. Tip: Share → Add to Home Screen to use it like an app, even offline.</p>
+</div>
+<script>
+{
+const steps=[
+["8:00",[["Wake up","","",["RH","HL"]]]],
+["8:30",[["Make breakfast","","",[],"9:00"]]],
+["9:00",[["Set the table","","",["Hannah"],"9:45"],["Move the couch","","",["RH","SW"]]]],
+["9:30",[["Prep stuffing","","",["HL"],"10:15"]]],
+["10:15",[["Stuffing cooking","oven","Check at 10:45",["HL"],"11:00","30–45 min"]]],
+["11:15",[["Turkey out to rest at room temp","","",["RH"],"12:30"],["Put wines in the fridge","","",["RH"]],["Prep charcuterie","","Into the fridge when done",["HL"],"12:30"],["Prep shrimp cocktail","","Into the fridge when done",["HL"],"12:30"]]],
+["12:30",[["Preheat oven to 325º","oven","",["RH"]],["Prep turkey","","Seasoned butter · salt & pepper · probe · cover with foil",["RH"],"12:45"]]],
+["1:00",[["Turkey in oven, cooking","oven","",["RH"],"5:00","4 hrs"]]],
+["1:15",[["Prep ham","","",["HL"],"1:30"]]],
+["1:30",[["Ham cooking","slow","",["HL"],"5:30","4 hrs"]]],
+["2:00",[["Lunch break / rest","","HL: good time to mix the ham glaze",[],"3:00"]]],
+["3:00",[["Prep potatoes","","",["HL","RH"],"3:30"]]],
+["3:30",[["Potatoes cooking","stove","",["HL"],"4:00","30 min"]]],
+["4:00",[["Take foil off turkey","oven","",["RH"]],["Mash potatoes","","",["HL"],"4:20"]]],
+["4:20",[["Get dressed for guests","","",[],"5:00"]]],
+["5:00",[["Take turkey out at 160º, then rest","oven","",["RH"],"5:30","30 min"],["Make gravy","stove","",["RH"]],["Stuffing final bake at 400º","oven","Then broil 5 min",["HL"],"5:20","20 min"],["Glaze ham","slow","",["HL"]],["Plate caviar","","",["HL"]]],1],
+["5:20",[["Broil stuffing","oven","",["HL"],"5:25","5 min"]]],
+["5:25",[["Stuffing out","oven","",["HL"]]]],
+["5:30",[["Carve turkey","","",["RH"]],["Make burrata salad","","",["HL"],"5:40","10 min"]]],
+["5:45",[["Serving dinner","","",[],"6:00"]]]
+];
+const bg={oven:[[615,660,"Stuffing","first bake"],[750,780,"Preheating","325º"],[780,1020,"Turkey","325º"],[1020,1040,"Stuffing","400º final bake"],[1040,1045,"Stuffing","broil"]],
+slow:[[810,1050,"Ham",""]],stove:[[930,960,"Potatoes",""],[1020,1040,"Gravy",""]]};
+const KEY='tg-2026-checks',FKEY='tg-2026-filter';
+const load=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
+const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let checks=load(KEY)||{};
+const cls=p=>p=='HL'?'HL':p=='RH'?'RH':'GU';
+const t=s=>{let[h,m]=s.split(':').map(Number);if(h<7)h+=12;return h*60+m};
+const f=m=>{let h=Math.floor(m/60),mm=String(m%60).padStart(2,'0');return (h>12?h-12:h)+':'+mm+(h>=12?' pm':' am')};
+document.getElementById('list').innerHTML=steps.map(([tm,its,big],i)=>`<div class="step${big?' big':''}" id="st${i}">`+its.map(([x,tg,n,w,e,d],j)=>{w=w||[];const id=i+'-'+j;return `<label class="it${checks[id]?' done':''}" data-w="${w.join(' ')}"><input type="checkbox" data-id="${id}"${checks[id]?' checked':''}><div class="rng">${tm}${e?`<span> – </span>${e}`:''}${d?`<div class="dur">${d}</div>`:''}</div><div class="body">${w.length?`<div class="whos">${w.map(p=>`<span class="who ${cls(p)}">${p}</span>`).join('')}</div>`:''}<div class="txt"><span class="tx">${x}</span>${tg?`<span class="tag ${tg}">${tg=='slow'?'slow cooker':tg}</span>`:''}${n?`<div class="note">${n}</div>`:''}</div></div></label>`}).join('')+'</div>').join('');
+document.querySelectorAll('.it input').forEach(c=>c.addEventListener('change',()=>{c.closest('.it').classList.toggle('done',c.checked);if(c.checked)checks[c.dataset.id]=1;else delete checks[c.dataset.id];save(KEY,checks);if(c.checked&&navigator.vibrate)navigator.vibrate(10)}));
+document.getElementById('reset').addEventListener('click',()=>{if(!confirm('Clear all checkmarks?'))return;checks={};save(KEY,checks);document.querySelectorAll('.it input').forEach(c=>{c.checked=false;c.closest('.it').classList.remove('done')})});
+function applyFilter(fv){document.querySelectorAll('.flt button[data-f]').forEach(x=>x.classList.toggle('sel',x.dataset.f==fv));
+steps.forEach((_,i)=>{const st=document.getElementById('st'+i);let vis=0;st.querySelectorAll('.it').forEach(it=>{const w=it.dataset.w;const show=fv=='all'||w==''||w.split(' ').includes(fv);it.classList.toggle('hide',!show);if(show)vis++});st.classList.toggle('hide',!vis)});save(FKEY,fv)}
+document.querySelectorAll('.flt button[data-f]').forEach(b=>b.addEventListener('click',()=>applyFilter(b.dataset.f)));
+applyFilter(load(FKEY)||'all');
+const sl=document.getElementById('sl');
+const clamp=m=>Math.min(1095,Math.max(480,m));
+let following=false;
+function upd(m,scroll){document.getElementById('clk').textContent=f(m);
+let cur=-1;steps.forEach(([tm],i)=>{if(t(tm)<=m)cur=i});
+steps.forEach((_,i)=>document.getElementById('st'+i).classList.toggle('now',i==cur));
+for(const k in bg){const a=bg[k].find(([s,e])=>m>=s&&m<e);document.getElementById('v-'+k).textContent=a?a[2]:'Free';document.getElementById('s-'+k).textContent=a?(a[3]?a[3]+' · ':'')+'done '+f(a[1]):'';document.getElementById('a-'+k).classList.toggle('on',!!a)}
+if(scroll&&cur>=0){const el=document.getElementById('st'+cur);const y=el.getBoundingClientRect().top+scrollY-document.querySelector('.top').offsetHeight-12;scrollTo({top:Math.max(0,y),behavior:'smooth'})}}
+const nowM=()=>{const d=new Date();return d.getHours()*60+d.getMinutes()};
+const isDay=()=>{const d=new Date();return d.getFullYear()==2026&&d.getMonth()==10&&d.getDate()==26};
+function goNow(scroll){following=true;const m=isDay()?clamp(nowM()):480;sl.value=m;upd(m,scroll)}
+sl.addEventListener('input',()=>{following=false;upd(+sl.value)});
+document.getElementById('nowb').addEventListener('click',()=>goNow(true));
+goNow(isDay());
+setInterval(()=>{if(following&&isDay()){const m=clamp(nowM());sl.value=m;upd(m)}},30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&following&&isDay())goNow(false)});
+// Keep the screen awake while the app is open (iOS 16.4+), so it stays readable on the counter.
+let lock=null;const wake=async()=>{try{if('wakeLock' in navigator&&!document.hidden)lock=await navigator.wakeLock.request('screen')}catch(e){}};
+wake();document.addEventListener('visibilitychange',wake);
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
